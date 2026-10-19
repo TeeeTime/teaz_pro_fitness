@@ -1,0 +1,46 @@
+# Production deploy on the VPS: `docker compose up -d --build`.
+# Expects the shared Traefik instance on the external "proxy" network
+# with a certificate resolver named "le", the shared Postgres server on the
+# external "db" network, and the variables below in .env (see README).
+services:
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    networks: [proxy]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.fitness.rule=Host(`fitness.teaz.pro`)
+      - traefik.http.routers.fitness.tls.certresolver=le
+      - traefik.http.services.fitness.loadbalancer.server.port=80
+      # Shown and controllable in Teaz Pulse.
+      - pro.teaz.pulse.app=Fitness
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      # Own database "fitness" with own user "fitness" on the shared Postgres server.
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:?set SPRING_DATASOURCE_URL in .env, see README}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:?set SPRING_DATASOURCE_USERNAME in .env, see README}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:?set SPRING_DATASOURCE_PASSWORD in .env, see README}
+      # Strava API app (strava.com/settings/api); without it the backend would serve sample runs.
+      FITNESS_STRAVA_CLIENT_ID: ${FITNESS_STRAVA_CLIENT_ID:?set FITNESS_STRAVA_CLIENT_ID in .env, see README}
+      FITNESS_STRAVA_CLIENT_SECRET: ${FITNESS_STRAVA_CLIENT_SECRET:?set FITNESS_STRAVA_CLIENT_SECRET in .env, see README}
+    networks: [proxy, db]
+    labels:
+      - traefik.enable=true
+      # Same host, /api only; Traefik prefers this longer rule over the frontend's.
+      - traefik.http.routers.fitness-api.rule=Host(`fitness.teaz.pro`) && PathPrefix(`/api`)
+      - traefik.http.routers.fitness-api.tls.certresolver=le
+      - traefik.http.services.fitness-api.loadbalancer.server.port=8080
+      # Traefik must reach it via "proxy", not the database network.
+      - traefik.docker.network=proxy
+      - pro.teaz.pulse.app=Fitness
+
+networks:
+  proxy:
+    external: true
+  # The shared Postgres server's network (internal), see /opt/teazpro/postgres.
+  db:
+    external: true
