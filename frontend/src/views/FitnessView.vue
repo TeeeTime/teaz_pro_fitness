@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { Icon } from '@teeetime/teaz-pro-ui'
 import ConnectStrava from '@/components/ConnectStrava.vue'
 import LatestRun from '@/components/LatestRun.vue'
 import RunList from '@/components/RunList.vue'
@@ -150,14 +151,19 @@ onBeforeUnmount(() => clearInterval(timer))
         <div class="fitness__actions">
           <template v-if="confirmingDisconnect">
             <span class="fitness__confirm">Removes your runs here and revokes access.</span>
-            <button type="button" class="button" :disabled="busy" @click="disconnect">Disconnect</button>
+            <button type="button" class="button" :disabled="busy" @click="disconnect">
+              <Icon name="unlink" class="button__icon" />
+              Disconnect
+            </button>
             <button type="button" class="button" :disabled="busy" @click="confirmingDisconnect = false">Cancel</button>
           </template>
           <template v-else>
             <button type="button" class="button button--primary" :disabled="busy" @click="syncNow">
+              <Icon name="refresh" class="button__icon" :class="{ 'button__icon--spinning': busy }" />
               {{ busy ? 'Syncing…' : 'Sync now' }}
             </button>
             <button type="button" class="button" :disabled="busy" @click="confirmingDisconnect = true">
+              <Icon name="unlink" class="button__icon" />
               Disconnect Strava
             </button>
           </template>

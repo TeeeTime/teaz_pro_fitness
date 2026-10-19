@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Icon } from '@teeetime/teaz-pro-ui'
 import { dayTime, duration, km, pace, SPORT_LABELS } from '@/format'
 import type { Run } from '@/types'
 
@@ -33,7 +34,10 @@ defineProps<{ run: Run | null }>()
       </div>
     </dl>
 
-    <a class="latest__link" :href="run.stravaUrl" target="_blank" rel="noopener">View on Strava</a>
+    <a class="latest__link" :href="run.stravaUrl" target="_blank" rel="noopener">
+      View on Strava
+      <Icon name="external" class="latest__link-icon" />
+    </a>
   </div>
   <p v-else class="latest__empty">No runs yet. Your next run on Strava shows up here.</p>
 </template>
@@ -77,11 +81,18 @@ defineProps<{ run: Run | null }>()
 }
 
 .latest__link {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   margin-top: 16px;
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--color-accent);
+}
+
+.latest__link-icon {
+  width: 14px;
+  height: 14px;
 }
 
 .latest__link:hover {

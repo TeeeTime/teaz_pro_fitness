@@ -52,6 +52,27 @@
   opacity: 0.5;
 }
 
+.button__icon {
+  width: 16px;
+  height: 16px;
+}
+
+.button__icon--spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button__icon--spinning {
+    animation: none;
+  }
+}
+
 .button--primary {
   color: var(--color-text-on-accent);
   background-color: var(--color-accent);
