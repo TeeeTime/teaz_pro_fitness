@@ -4,6 +4,9 @@ import '@teeetime/teaz-pro-ui/style.css'
 import { createApp } from 'vue'
 import App from './App.vue'
 import { useAuth } from './auth'
+import { stashStravaCallback } from './stravaCallback'
+
+stashStravaCallback()
 
 // Mount only once logged in; with Keycloak, init() may redirect to the login page instead.
 useAuth()

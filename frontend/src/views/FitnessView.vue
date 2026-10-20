@@ -7,6 +7,7 @@ import RunList from '@/components/RunList.vue'
 import WeeklyChart from '@/components/WeeklyChart.vue'
 import { api, ApiError, errorMessage } from '@/api'
 import { clock, dayTime } from '@/format'
+import { takeStravaCallback } from '@/stravaCallback'
 import type { RunList as RunListResponse, StravaStatus, WeeklyDistance } from '@/types'
 
 // The backend syncs every 15 minutes; checking a few times in between is plenty.
@@ -26,14 +27,10 @@ const error = ref<string | null>(null)
 const loadError = ref<string | null>(null)
 const info = ref<string | null>(null)
 
-/**
- * Strava sends the browser back to /strava/callback?code=…&state=…&scope=…
- * (or ?error=access_denied). Hand that to the backend, then show the app at /.
- */
+/** Hands what Strava sent back (see stravaCallback.ts) to the backend. */
 async function finishStravaCallback() {
-  if (window.location.pathname !== '/strava/callback') return
-  const params = new URLSearchParams(window.location.search)
-  window.history.replaceState(null, '', '/')
+  const params = takeStravaCallback()
+  if (!params) return
   if (params.has('error')) {
     info.value = 'Connecting Strava was cancelled.'
     return
